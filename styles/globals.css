@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-color: #CEF848;
+    --brand-color-hover: #CEF848;
+    --bg-color: #000000;
+    --border-color: #e5e7eb;
+    --text-primary: #000000;
+    --text-secondary: #4b5563;
+    --text-tertiary: #6b7280;
+  }
+
+  .dark {
+    --bg-color: #010409;
+    --border-color: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #e5e7eb;
+    --text-tertiary: #d1d5db;
+  }
+
+  body {
+    @apply bg-white dark:bg-dark-primary text-gray-900 dark:text-dark-primary transition-colors duration-200 !important;
+  }
+
+  /* Ensure headings and paragraphs use dark mode */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-gray-900 dark:text-dark-primary;
+  }
+
+  p {
+    @apply text-gray-600 dark:text-dark-secondary;
+  }
+
+  /* Ensure links use dark mode */
+  a {
+    @apply text-[var(--brand-color)] hover:text-[var(--brand-color-hover)];
+  }
+
+  /* Ensure form inputs use dark mode */
+  input,
+  textarea,
+  select {
+    @apply bg-white dark:bg-dark-secondary border border-gray-100 dark:border-dark-border text-gray-900 dark:text-dark-primary focus:ring-[var(--brand-color)] focus:border-[var(--brand-color)] dark:focus:ring-opacity-50;
+  }
+
+  /* Ensure buttons use dark mode */
+  button {
+    @apply bg-[var(--brand-color)] text-white hover:bg-[var(--brand-color-hover)] dark:bg-dark-secondary dark:text-dark-primary dark:hover:bg-gray-700;
+  }
+}
+
+@layer components {
+  /* Ensure all components use dark mode */
+  .btn {
+    @apply text-sm font-medium inline-flex items-center justify-center rounded-full leading-5 whitespace-nowrap transition duration-150 ease-in-out;
+  }
+
+  .btn-sm {
+    @apply px-4 py-2;
+  }
+
+  .btn-brand {
+    @apply bg-[var(--brand-color)] text-white hover:bg-[var(--brand-color-hover)];
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 dark:bg-dark-secondary text-gray-700 dark:text-dark-primary hover:bg-gray-200 dark:hover:bg-gray-700;
+  }
+
+  /* Card components */
+  .card {
+    @apply bg-white dark:bg-dark-secondary border border-gray-200 dark:border-dark-border rounded-lg shadow-sm;
+  }
+
+  .card-hover {
+    @apply hover:border-gray-300 dark:hover:border-gray-600 transition-colors duration-200;
+  }
+
+  /* Form components */
+  .input {
+    @apply bg-white dark:bg-dark-secondary border-gray-200 dark:border-dark-border text-gray-900 dark:text-dark-primary focus:ring-[var(--brand-color)] focus:border-[var(--brand-color)] dark:focus:ring-opacity-50;
+  }
+
+  .input-group {
+    @apply flex rounded-md shadow-sm;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-1;
+  }
+
+  /* Navigation components */
+  .nav-link {
+    @apply text-gray-600 dark:text-dark-secondary hover:text-gray-900 dark:hover:text-dark-primary transition-colors duration-200;
+  }
+
+  .nav-link-active {
+    @apply text-[var(--brand-color)] dark:text-[var(--brand-color)];
+  }
+
+  /* Dropdown components */
+  .dropdown {
+    @apply absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-dark-secondary ring-1 ring-black ring-opacity-5 focus:outline-none;
+  }
+
+  .dropdown-item {
+    @apply block px-4 py-2 text-sm text-gray-700 dark:text-dark-secondary hover:bg-gray-100 dark:hover:bg-gray-700;
+  }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Typography */
+.prose {
+  @apply dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-dark-primary prose-p:text-gray-600 dark:prose-p:text-dark-secondary prose-a:text-[var(--brand-color)] prose-strong:text-gray-900 dark:prose-strong:text-dark-primary;
+}
+
+/* Font faces */
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 400;
+  src: url('/fonts/Poppins-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 500;
+  src: url('/fonts/Poppins-Medium.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 600;
+  src: url('/fonts/Poppins-SemiBold.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 700;
+  src: url('/fonts/Poppins-Bold.ttf');
+}
+
+/* Transitions */
+.transition-theme {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* Custom scrollbar for browsers that support it */
+@media (min-width: 768px) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-color) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    @apply bg-transparent dark:bg-transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+}
