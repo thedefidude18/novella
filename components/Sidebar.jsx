@@ -35,9 +35,9 @@ const TopProjects = () => {
     try {
       const { data } = await orbis.getPosts({
         context: global.orbis_context,
+        only_master: true,
         tag: 'category:projects',
-        order_by: 'count_likes',
-        only_master: true
+        order_by: 'count_likes'
       }, 0, 3);
 
       if (data) {
@@ -148,6 +148,12 @@ const TopProjects = () => {
               <p className="text-sm text-gray-500 dark:text-dark-secondary">
                 No projects found
               </p>
+              <Link 
+                href="/create" 
+                className="text-sm text-[var(--brand-color)] hover:underline mt-2 inline-block"
+              >
+                Create the first project →
+              </Link>
             </div>
           )}
         </div>
