@@ -4,8 +4,9 @@ import { useOrbis, User } from '@orbisclub/components';
 import { LoadingCircle } from './Icons';
 import ReactTimeAgo from 'react-time-ago';
 import { getIpfsLink } from '../utils';
-import { FaEthereum, FaHeart, FaComment } from 'react-icons/fa';
+import { FaEthereum, FaHeart, FaComment, FaUsers, FaTrophy } from 'react-icons/fa';
 import DonateButton from './DonateButton';
+import { CATEGORIES } from '../config/categories';
 
 function Sidebar() {
   return (
@@ -13,6 +14,7 @@ function Sidebar() {
       <div className="md:pl-6 lg:pl-10">
         <div className="space-y-8">
           <TopProjects />
+          <TopUsers />
           <RecentDiscussions />
           <UpcomingEvents />
         </div>
@@ -33,18 +35,35 @@ const TopProjects = () => {
   async function loadProjects() {
     setLoading(true);
     try {
+      // Get all posts sorted by likes
       const { data } = await orbis.getPosts({
         context: global.orbis_context,
         only_master: true,
-        tag: 'category:projects',
         order_by: 'count_likes'
-      }, 0, 3);
+      });
 
       if (data) {
-        const projectsWithDonations = await Promise.all(data.map(async (project) => {
+        // Filter posts that belong to project-related categories
+        const projectPosts = data.filter(post => {
+          const category = post.content?.context;
+          return category && (
+            category === 'projects' ||
+            category === 'public-goods' ||
+            category === 'dapps' ||
+            category === 'infrastructure' ||
+            category === 'defi'
+          );
+        });
+
+        // Get top 3 project posts
+        const topProjects = projectPosts.slice(0, 3);
+
+        // Add donation information
+        const projectsWithDonations = await Promise.all(topProjects.map(async (project) => {
           const donations = await loadProjectDonations(project.stream_id);
           return { ...project, donations };
         }));
+
         setProjects(projectsWithDonations);
       }
     } catch (error) {
@@ -76,6 +95,11 @@ const TopProjects = () => {
   }
 
   const formatDonation = (amount) => parseFloat(amount).toFixed(4);
+
+  // Get category label from CATEGORIES object
+  const getCategoryLabel = (categoryId) => {
+    return CATEGORIES[categoryId]?.label || categoryId;
+  };
 
   return (
     <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-4">
@@ -113,6 +137,9 @@ const TopProjects = () => {
                     </p>
                     
                     <div className="mt-1 flex items-center space-x-2 text-xs text-gray-500 dark:text-dark-secondary">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        {getCategoryLabel(project.content.context)}
+                      </span>
                       <span className="flex items-center">
                         <FaHeart className="w-3 h-3 mr-1" />
                         {project.count_likes || 0}
@@ -154,6 +181,225 @@ const TopProjects = () => {
               >
                 Create the first project →
               </Link>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const TopUsers = () => {
+  const { orbis, user } = useOrbis();
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState([]);
+  const [followingMap, setFollowingMap] = useState({});
+  const [followLoading, setFollowLoading] = useState({});
+
+  useEffect(() => {
+    loadTopUsers();
+  }, []);
+
+  useEffect(() => {
+    if (user?.did) {
+      loadFollowingStatus();
+    }
+  }, [user?.did]);
+
+  async function loadFollowingStatus() {
+    if (!user?.did) return;
+
+    try {
+      const { data, error } = await orbis.getConnections({
+        did: user.did,
+        type: 'follow'
+      });
+
+      if (error) {
+        console.error('Error from Orbis:', error);
+        return;
+      }
+
+      if (Array.isArray(data)) {
+        const following = {};
+        data.forEach(connection => {
+          if (connection?.target) {
+            following[connection.target] = connection.active;
+          }
+        });
+        setFollowingMap(following);
+      }
+    } catch (error) {
+      console.error('Error loading following status:', error);
+    }
+  }
+
+  async function handleFollow(targetDid) {
+    if (!user?.did) {
+      alert('Please connect your wallet to follow users');
+      return;
+    }
+
+    setFollowLoading(prev => ({ ...prev, [targetDid]: true }));
+
+    try {
+      const isFollowing = followingMap[targetDid];
+      const res = await orbis.connect({
+        type: 'follow',
+        target: targetDid,
+        active: !isFollowing
+      });
+
+      if (res.status === 200) {
+        setFollowingMap(prev => ({
+          ...prev,
+          [targetDid]: !isFollowing
+        }));
+      } else {
+        throw new Error(res.error || 'Failed to update follow status');
+      }
+    } catch (error) {
+      console.error('Error updating follow status:', error);
+      alert('Failed to update follow status. Please try again.');
+    } finally {
+      setFollowLoading(prev => ({ ...prev, [targetDid]: false }));
+    }
+  }
+
+  async function loadTopUsers() {
+    setLoading(true);
+    try {
+      // Get all posts to analyze user activity
+      const { data: posts } = await orbis.getPosts({
+        context: global.orbis_context
+      });
+
+      // Create a map to track user stats
+      const userStats = new Map();
+
+      // Process posts to gather user statistics
+      for (const post of posts) {
+        const userId = post.creator_details?.did;
+        if (!userId) continue;
+
+        if (!userStats.has(userId)) {
+          userStats.set(userId, {
+            did: userId,
+            details: post.creator_details,
+            posts: 0,
+            likes: 0,
+            comments: 0,
+            points: post.creator_details?.profile?.metadata?.points || 0
+          });
+        }
+
+        const stats = userStats.get(userId);
+        stats.posts++;
+        stats.likes += post.count_likes || 0;
+        stats.comments += post.count_replies || 0;
+      }
+
+      // Calculate engagement score and sort users
+      const topUsers = Array.from(userStats.values())
+        .map(user => ({
+          ...user,
+          score: calculateEngagementScore(user)
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5); // Get top 5 users
+
+      setUsers(topUsers);
+    } catch (error) {
+      console.error('Error loading top users:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function calculateEngagementScore(user) {
+    return (
+      user.points * 10 +
+      user.posts * 50 +
+      user.likes * 5 +
+      user.comments * 10
+    );
+  }
+
+  return (
+    <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-4">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-primary mb-4">
+        Top Users
+      </h3>
+
+      {loading ? (
+        <div className="flex justify-center p-4">
+          <LoadingCircle />
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {users.map((user) => (
+            <div 
+              key={user.did}
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-tertiary transition-colors"
+            >
+              <Link 
+                href={`/profile/${user.did}`}
+                className="flex items-center space-x-3 flex-1 min-w-0"
+              >
+                <User details={user.details} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-dark-primary truncate">
+                    {user.details?.profile?.username || 'Anonymous'}
+                  </p>
+                  <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-dark-secondary">
+                    <span className="flex items-center">
+                      <FaTrophy className="w-3 h-3 mr-1 text-yellow-500" />
+                      {user.points}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center">
+                      <FaHeart className="w-3 h-3 mr-1" />
+                      {user.likes}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center">
+                      <FaComment className="w-3 h-3 mr-1" />
+                      {user.comments}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+
+              {user.did !== user?.did && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleFollow(user.did);
+                  }}
+                  disabled={followLoading[user.did]}
+                  className={`ml-2 px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                    followingMap[user.did]
+                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-tertiary dark:text-dark-secondary'
+                      : 'bg-[var(--brand-color)] text-white hover:bg-[var(--brand-color-hover)]'
+                  }`}
+                >
+                  {followLoading[user.did] ? (
+                    <LoadingCircle className="w-4 h-4" />
+                  ) : followingMap[user.did] ? (
+                    'Following'
+                  ) : (
+                    'Follow'
+                  )}
+                </button>
+              )}
+            </div>
+          ))}
+
+          {users.length === 0 && (
+            <div className="text-center py-4">
+              <p className="text-sm text-gray-500 dark:text-dark-secondary">
+                No users found
+              </p>
             </div>
           )}
         </div>
