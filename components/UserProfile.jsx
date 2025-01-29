@@ -6,11 +6,16 @@ import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import { LoadingCircle, EditIcon } from "./Icons";
 import UserCredentials from "./UserCredentials";
-import { FaGithub, FaTwitter, FaGlobe, FaEthereum, FaHeart, FaComment } from 'react-icons/fa';
+import { FaGithub, FaTwitter, FaGlobe, FaEthereum, FaHeart, FaComment,  FaShare,
+  FaTag,
+  FaEllipsisH,
+  FaTrophy, } from 'react-icons/fa';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import parse from 'html-react-parser';
 import Link from 'next/link';
+import { POINTS_RULES } from '../config/points';
+
 
 if (!TimeAgo.getDefaultLocale()) {
   TimeAgo.addDefaultLocale(en);
@@ -20,6 +25,57 @@ const timeAgo = new TimeAgo('en-US');
 
 function NFT({ nft, chain, callback }) {
   const [isHovered, setIsHovered] = useState(false);
+   const [updatedPost, setUpdatedPost] = useState(post);
+    const [showMenu, setShowMenu] = useState(false);
+    const [userPoints, setUserPoints] = useState(0);
+    const points = profile?.details?.profile?.metadata?.points || 0;
+setUserPoints(points);
+    
+      
+
+  useEffect(() => {
+    if (post) {
+      loadUserPoints();
+
+    }
+  }, [post]);
+
+
+  async function loadUserPoints() {
+    if (post.creator_details?.did) {
+      try {
+        const { data: profile } = await orbis.getProfile(
+          post.creator_details.did
+        );
+        const points = profile?.details?.profile?.metadata?.points || 0;
+        setUserPoints(points);
+      } catch (error) {
+        console.error('Error loading user points:', error);
+      }
+    }
+  }
+
+
+async function updateUserPoints(did, pointsToAdd) {
+    try {
+      const { data: profile } = await orbis.getProfile(did);
+      const currentPoints = profile?.details?.profile?.metadata?.points || 0;
+      const newPoints = currentPoints + pointsToAdd;
+
+      const res = await orbis.updateProfile({
+        ...profile?.details?.profile,
+        metadata: {
+          ...profile?.details?.profile?.metadata,
+          points: newPoints,
+        },
+      });
+
+      return res.status === 200;
+    } catch (error) {
+      console.error('Error updating points:', error);
+      return false;
+    }
+  }
 
   return (
     <div 
@@ -222,7 +278,7 @@ export default function UserProfile({ details, initialData }) {
               </div>
               <div className="bg-gray-50 rounded-lg p-6">
                 <div className="flex items-center">
-                  <span className="text-2xl font-bold">{details?.profile?.points || 0}</span>
+                <span className="text-2xl font-bold">{details?.profile?.points || 0}</span> {/* Updated to use userPoints */}
                 </div>
                 <p className="mt-2 text-sm text-gray-500">Points</p>
               </div>

@@ -293,12 +293,13 @@ export default function PostItem({ post }) {
     <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border overflow-hidden">
       <div className="p-6">
         <div className="flex items-start space-x-4">
-          <Upvote
-            like={like}
-            active={hasLiked}
-            count={updatedPost.count_likes || 0}
-            disabled={isLoading}
-          />
+        <Upvote
+    like={like}
+    active={hasLiked}
+    count={updatedPost.count_likes || 0}
+    disabled={isLoading}
+    iconClass="w-2 h-2" // Apply a smaller size to the icon
+  />
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">

@@ -13,7 +13,6 @@ function Sidebar() {
     <aside className="md:w-64 lg:w-80 md:shrink-0 pt-6 pb-12 md:pb-20">
       <div className="md:pl-6 lg:pl-10">
         <div className="space-y-8">
-          <TopProjects />
           <TopUsers />
           <RecentDiscussions />
           <UpcomingEvents />
@@ -328,7 +327,7 @@ const TopUsers = () => {
   return (
     <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-4">
       <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-primary mb-4">
-        Top Users
+        Top Builders
       </h3>
 
       {loading ? (
@@ -349,18 +348,13 @@ const TopUsers = () => {
                 <User details={user.details} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-dark-primary truncate">
-                    {user.details?.profile?.username || 'Anonymous'}
+                    {user.details?.profile?.username || ''}
                   </p>
                   <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-dark-secondary">
                     <span className="flex items-center">
                       <FaTrophy className="w-3 h-3 mr-1 text-yellow-500" />
                       {user.points}
-                    </span>
-                    <span>•</span>
-                    <span className="flex items-center">
-                      <FaHeart className="w-3 h-3 mr-1" />
-                      {user.likes}
-                    </span>
+                    </span>              
                     <span>•</span>
                     <span className="flex items-center">
                       <FaComment className="w-3 h-3 mr-1" />
@@ -459,11 +453,6 @@ const RecentDiscussions = () => {
                   </p>
                   <div className="mt-1 flex items-center space-x-2 text-xs text-gray-500 dark:text-dark-secondary">
                     <ReactTimeAgo date={post.timestamp * 1000} locale="en-US" />
-                    <span>•</span>
-                    <span className="flex items-center">
-                      <FaHeart className="w-3 h-3 mr-1" />
-                      {post.count_likes || 0}
-                    </span>
                     <span>•</span>
                     <span className="flex items-center">
                       <FaComment className="w-3 h-3 mr-1" />

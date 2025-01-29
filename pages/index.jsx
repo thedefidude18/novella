@@ -79,7 +79,7 @@ export default function Home() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="hidden md:block fixed right-0 top-16 bottom-0 w-80 bg-white dark:bg-dark-primary border-l border-gray-80 dark:border-dark-border overflow-y-auto">
+        <div className="hidden md:block fixed right-0 top-16 bottom-0 w-84 bg-white dark:bg-dark-primary border-l border-gray-80 dark:border-dark-border overflow-y-auto">
           <Sidebar />
         </div>
       </div>

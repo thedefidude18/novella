@@ -151,52 +151,50 @@ export default function DonateButton({ post }) {
       setError('Please enter a valid amount');
       return;
     }
+  
+    console.log("Proceeding with donation..."); // Check if execution continues
 
     setError('');
     setIsProcessing(true);
-
+  
     try {
+      // Get user information from Orbis
+      const { data: user } = await orbis.isConnected();
+      if (!user || !user.did) {
+        throw new Error('User is not authenticated.');
+      }
+  
       // Switch chain if needed
       if (chainId !== selectedChain) {
         await switchChain({ chainId: selectedChain });
       }
-
+  
       let tx;
-      // Handle ETH donation
       if (selectedToken === 'ETH') {
         tx = await walletClient.sendTransaction({
           to: recipientAddress,
           value: parseEther(amount)
         });
-      } 
-      // Handle ERC20 token donation
-      else {
+      } else {
         const token = TOKENS[selectedChain][selectedToken];
-        if (!token) {
-          throw new Error('Token not supported on selected chain');
-        }
-
-        // First approve the spending
-        const approveTx = await writeContractAsync({
+        if (!token) throw new Error('Token not supported on selected chain');
+  
+        await writeContractAsync({
           address: token.address,
           abi: ERC20_ABI,
           functionName: 'approve',
           args: [recipientAddress, parseUnits(amount, token.decimals)]
         });
-
-        if (approveTx) {
-          // Then transfer the tokens
-          tx = await writeContractAsync({
-            address: token.address,
-            abi: ERC20_ABI,
-            functionName: 'transfer',
-            args: [recipientAddress, parseUnits(amount, token.decimals)]
-          });
-        }
+  
+        tx = await writeContractAsync({
+          address: token.address,
+          abi: ERC20_ABI,
+          functionName: 'transfer',
+          args: [recipientAddress, parseUnits(amount, token.decimals)]
+        });
       }
-
+  
       if (tx) {
-        // Record the donation in Orbis
         await orbis.createPost({
           context: post.stream_id,
           body: `Donated ${amount} ${selectedToken}`,
@@ -208,15 +206,15 @@ export default function DonateButton({ post }) {
             transaction: tx
           }
         });
-
-        // Award points to the donor
+  
+        // Award points to donor
         await updateUserPoints(orbis, user.did, POINTS_RULES.ENGAGE_DONATION);
         
-        // Award points to the recipient
+        // Award points to recipient
         if (post.creator_details?.did) {
           await updateUserPoints(orbis, post.creator_details.did, POINTS_RULES.RECEIVE_DONATION);
         }
-
+  
         closeModal();
         alert('Thank you for your donation!');
       }
@@ -227,6 +225,7 @@ export default function DonateButton({ post }) {
       setIsProcessing(false);
     }
   };
+  
 
   const getAvailableTokens = (chainId) => {
     const tokens = ['ETH'];
@@ -369,7 +368,7 @@ export default function DonateButton({ post }) {
               {/* Donate Button */}
               <button
                 onClick={handleDonate}
-                disabled={!isConnected || !amount || isProcessing}
+                disabled={!isConnected || parseFloat(amount) <= 0 || isProcessing}
                 className="w-full flex items-center justify-center py-2.5 px-4 bg-[var(--brand-color)] text-white rounded-lg hover:bg-[var(--brand-color-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium text-sm"
               >
                 {isProcessing ? (
