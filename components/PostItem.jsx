@@ -304,7 +304,12 @@ export default function PostItem({ post }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <User details={post.creator_details} />
-                <span className="text-gray-300 dark:text-gray-600">•</span>
+                <img 
+        src="/social-media.png" // Replace with the actual image path
+        alt="Verified" 
+        className="w-4 h-4" 
+        title="Verified"
+      />
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   {timeAgo.format(post.timestamp * 1000)}
                 </span>
@@ -318,10 +323,6 @@ export default function PostItem({ post }) {
                   </>
                 )}
                 <span className="text-gray-300 dark:text-gray-600">•</span>
-                <span className="inline-flex items-center text-sm font-medium text-yellow-600">
-                  <FaTrophy className="mr-1" />
-                  {userPoints} points
-                </span>
               </div>
 
               <div className="relative" ref={menuRef}>
@@ -393,6 +394,13 @@ export default function PostItem({ post }) {
                   <CommentsIcon className="mr-2" />
                   {post.count_replies || 0}
                 </button>
+
+                
+                 <span className="inline-flex items-center text-sm font-medium text-yellow-600">
+                 <FaTrophy className="mr-1" />
+                 {userPoints} points
+               </span>
+                
 
                 <button
                   className="flex items-center hover:text-gray-700"
