@@ -371,7 +371,6 @@ export default function PostItem({ post }) {
                 </button>
 
                 <span className="inline-flex items-center text-sm font-medium text-yellow-600">
-                  <FaTrophy className="mr-1" />
                   {userPoints} points
                 </span>
 
@@ -381,7 +380,6 @@ export default function PostItem({ post }) {
                   disabled={isLoading}
                 >
                   <FaShare className="mr-1" />
-                  Share
                 </button>
 
                 {showDonateButton && (
