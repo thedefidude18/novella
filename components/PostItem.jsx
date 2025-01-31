@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { User, useOrbis } from '@orbisclub/components';
-import { getIpfsLink } from '../utils';
+import { User, useOrbis } from "@orbisclub/components";
+import { getIpfsLink } from "../utils";
 import { CommentsIcon } from './Icons';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
@@ -36,9 +36,7 @@ export default function PostItem({ post }) {
   const [showMenu, setShowMenu] = useState(false);
   const [userPoints, setUserPoints] = useState(0);
   const [totalDonations, setTotalDonations] = useState({
-    ETH: 0,
-    USDT: 0,
-    USDC: 0,
+    USDT: 0
   });
   const [isLoading, setIsLoading] = useState(false);
   const menuRef = useRef(null);
@@ -88,22 +86,17 @@ export default function PostItem({ post }) {
         only_master: false,
       });
 
-      const donationAmounts = {
-        ETH: 0,
-        USDT: 0,
-        USDC: 0,
+      const donationAmount = {
+        USDT: 0
       };
 
       donations?.forEach((donation) => {
-        if (donation.content?.data?.type === 'donation') {
-          const { amount, token } = donation.content.data;
-          if (donationAmounts.hasOwnProperty(token)) {
-            donationAmounts[token] += parseFloat(amount);
-          }
+        if (donation.content?.data?.type === 'donation' && donation.content.data.token === 'USDT') {
+          donationAmount.USDT += parseFloat(donation.content.data.amount);
         }
       });
 
-      setTotalDonations(donationAmounts);
+      setTotalDonations(donationAmount);
     } catch (error) {
       console.error('Error loading donations:', error);
     }
@@ -267,25 +260,6 @@ export default function PostItem({ post }) {
     return parseFloat(amount).toFixed(4);
   };
 
-  const calculateTotalUSD = () => {
-    const rates = {
-      ETH: 2000,
-      USDT: 1,
-      USDC: 1,
-    };
-
-    return Object.entries(totalDonations).reduce((total, [token, amount]) => {
-      return total + parseFloat(amount) * rates[token];
-    }, 0);
-  };
-
-  const formatUSD = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
   const showDonateButton =
     CATEGORIES[post.content?.context]?.enableDonation || false;
 
@@ -293,24 +267,24 @@ export default function PostItem({ post }) {
     <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border overflow-hidden">
       <div className="p-6">
         <div className="flex items-start space-x-4">
-        <Upvote
-    like={like}
-    active={hasLiked}
-    count={updatedPost.count_likes || 0}
-    disabled={isLoading}
-    iconClass="w-2 h-2" // Apply a smaller size to the icon
-  />
+          <Upvote
+            like={like}
+            active={hasLiked}
+            count={updatedPost.count_likes || 0}
+            disabled={isLoading}
+            iconClass="w-2 h-2"
+          />
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <User details={post.creator_details} />
                 <img 
-        src="/social-media.png" // Replace with the actual image path
-        alt="Verified" 
-        className="w-4 h-4" 
-        title="Verified"
-      />
+                  src="/social-media.png"
+                  alt="Verified" 
+                  className="w-4 h-4" 
+                  title="Verified"
+                />
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   {timeAgo.format(post.timestamp * 1000)}
                 </span>
@@ -396,12 +370,10 @@ export default function PostItem({ post }) {
                   {post.count_replies || 0}
                 </button>
 
-                
-                 <span className="inline-flex items-center text-sm font-medium text-yellow-600">
-                 <FaTrophy className="mr-1" />
-                 {userPoints} points
-               </span>
-                
+                <span className="inline-flex items-center text-sm font-medium text-yellow-600">
+                  <FaTrophy className="mr-1" />
+                  {userPoints} points
+                </span>
 
                 <button
                   className="flex items-center hover:text-gray-700"
@@ -416,31 +388,12 @@ export default function PostItem({ post }) {
                   <>
                     <div className="flex items-center space-x-2">
                       <span className="text-gray-500">Raised:</span>
-                      {Object.values(totalDonations).some(
-                        (amount) => amount > 0
-                      ) ? (
-                        <div className="flex flex-wrap gap-2">
-                          {Object.entries(totalDonations).map(
-                            ([token, amount]) =>
-                              amount > 0 && (
-                                <div
-                                  key={token}
-                                  className="flex items-center text-green-600"
-                                >
-                                  <FaEthereum className="mr-1" />
-                                  <span>
-                                    {formatDonation(amount)} {token}
-                                  </span>
-                                </div>
-                              )
-                          )}
-                          <span className="text-gray-500">
-                            ({formatUSD(calculateTotalUSD())})
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-500">$0.00</span>
-                      )}
+                      <div className="flex items-center text-green-600">
+                        <FaEthereum className="mr-1" />
+                        <span>
+                          {formatDonation(totalDonations.USDT)} USDT
+                        </span>
+                      </div>
                     </div>
 
                     <DonateButton post={post} disabled={isLoading} />

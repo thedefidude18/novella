@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    --brand-color: #CEF848;
-    --brand-color-hover: #CEF848;
+    --brand-color: #5171ff;
+    --brand-color-hover: #cff84800;
     --bg-color: #000000;
     --border-color: #e5e7eb;
     --text-primary: #000000;
-    --text-secondary: #4b5563;
-    --text-tertiary: #6b7280;
+    --text-secondary: #000000;
+    --text-tertiary: #000000;
   }
 
   .dark {

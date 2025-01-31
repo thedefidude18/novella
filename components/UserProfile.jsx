@@ -6,111 +6,18 @@ import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import { LoadingCircle, EditIcon } from "./Icons";
 import UserCredentials from "./UserCredentials";
-import { FaGithub, FaTwitter, FaGlobe, FaEthereum, FaHeart, FaComment,  FaShare,
-  FaTag,
-  FaEllipsisH,
-  FaTrophy, } from 'react-icons/fa';
+import { FaGithub, FaTwitter, FaGlobe, FaEthereum, FaHeart, FaComment, FaShare, FaTag, FaEllipsisH, FaTrophy } from 'react-icons/fa';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import parse from 'html-react-parser';
 import Link from 'next/link';
 import { POINTS_RULES } from '../config/points';
 
-
 if (!TimeAgo.getDefaultLocale()) {
   TimeAgo.addDefaultLocale(en);
 }
 
 const timeAgo = new TimeAgo('en-US');
-
-function NFT({ nft, chain, callback }) {
-  const [isHovered, setIsHovered] = useState(false);
-   const [updatedPost, setUpdatedPost] = useState(post);
-    const [showMenu, setShowMenu] = useState(false);
-    const [userPoints, setUserPoints] = useState(0);
-    const points = profile?.details?.profile?.metadata?.points || 0;
-setUserPoints(points);
-    
-      
-
-  useEffect(() => {
-    if (post) {
-      loadUserPoints();
-
-    }
-  }, [post]);
-
-
-  async function loadUserPoints() {
-    if (post.creator_details?.did) {
-      try {
-        const { data: profile } = await orbis.getProfile(
-          post.creator_details.did
-        );
-        const points = profile?.details?.profile?.metadata?.points || 0;
-        setUserPoints(points);
-      } catch (error) {
-        console.error('Error loading user points:', error);
-      }
-    }
-  }
-
-
-async function updateUserPoints(did, pointsToAdd) {
-    try {
-      const { data: profile } = await orbis.getProfile(did);
-      const currentPoints = profile?.details?.profile?.metadata?.points || 0;
-      const newPoints = currentPoints + pointsToAdd;
-
-      const res = await orbis.updateProfile({
-        ...profile?.details?.profile,
-        metadata: {
-          ...profile?.details?.profile?.metadata,
-          points: newPoints,
-        },
-      });
-
-      return res.status === 200;
-    } catch (error) {
-      console.error('Error updating points:', error);
-      return false;
-    }
-  }
-
-  return (
-    <div 
-      className="relative rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="aspect-square">
-        {nft.media?.[0] && (
-          <img
-            src={nft.media[0].thumbnail || nft.media[0].gateway}
-            alt={nft.title}
-            className="w-full h-full object-cover"
-          />
-        )}
-        {isHovered && (
-          <div
-            className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white cursor-pointer"
-            onClick={() => callback(nft.media[0]?.thumbnail || nft.media[0]?.gateway, {
-              chain,
-              contract: nft.contract.address,
-              tokenId: nft.id.tokenId,
-              timestamp: getTimestamp()
-            })}
-          >
-            <p className="text-sm font-medium">Use as Profile Picture</p>
-          </div>
-        )}
-      </div>
-      <div className="p-2">
-        <p className="text-sm font-medium text-gray-900 truncate">{nft.title}</p>
-      </div>
-    </div>
-  );
-}
 
 export default function UserProfile({ details, initialData }) {
   const { orbis, user } = useOrbis();
@@ -124,6 +31,7 @@ export default function UserProfile({ details, initialData }) {
     totalDonors: 0,
     recentDonations: []
   });
+  const [userPoints, setUserPoints] = useState(0); // Initialize userPoints state
 
   const isOwnProfile = user?.did === details?.did;
   const { address } = useDidToAddress(details?.did);
@@ -134,6 +42,22 @@ export default function UserProfile({ details, initialData }) {
       loadDonationStats();
     }
   }, [address]);
+
+  useEffect(() => {
+    if (details?.did) {
+      loadUserPoints();
+    }
+  }, [details]);
+
+  async function loadUserPoints() {
+    try {
+      const { data: profile } = await orbis.getProfile(details.did);
+      const points = profile?.details?.profile?.metadata?.points || 0;
+      setUserPoints(points);
+    } catch (error) {
+      console.error('Error loading user points:', error);
+    }
+  }
 
   async function loadNfts() {
     try {
@@ -278,7 +202,9 @@ export default function UserProfile({ details, initialData }) {
               </div>
               <div className="bg-gray-50 rounded-lg p-6">
                 <div className="flex items-center">
-                <span className="text-2xl font-bold">{details?.profile?.points || 0}</span> {/* Updated to use userPoints */}
+                <span className="text-2xl font-bold">
+                    {userPoints} 
+                  </span>
                 </div>
                 <p className="mt-2 text-sm text-gray-500">Points</p>
               </div>
@@ -360,7 +286,7 @@ export default function UserProfile({ details, initialData }) {
             <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Select NFT as Profile Picture
+                  Select NFT as Pfp
                 </h3>
                 <button
                   onClick={() => setShowNftSelector(false)}

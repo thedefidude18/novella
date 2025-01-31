@@ -139,21 +139,29 @@ export default function DonateButton({ post }) {
   };
 
   const handleDonate = async () => {
+    console.log('Checking wallet connection...');
     if (!isConnected) {
       setError('Please connect your wallet first');
       return;
     }
-    if (!recipientAddress) {
-      setError('Invalid recipient address');
-      return;
-    }
-    if (!amount || parseFloat(amount) <= 0) {
-      setError('Please enter a valid amount');
-      return;
-    }
   
-    console.log("Proceeding with donation..."); // Check if execution continues
+    console.log('Checking Orbis authentication...');
+    const { data: user, error: orbisError } = await orbis.isConnected();
+    console.log('Orbis user:', user);
+    console.log('Orbis error:', orbisError);
+  
+    if (!user || !user.did || orbisError) {
+      console.log('User not authenticated, attempting to connect...');
+      const authRes = await orbis.connect();
+      console.log('Orbis connect response:', authRes);
+  
+      if (authRes.status !== 200) {
+        setError('Failed to authenticate with Orbis');
+        return;
+      }
+    }
 
+    
     setError('');
     setIsProcessing(true);
   
@@ -225,6 +233,7 @@ export default function DonateButton({ post }) {
       setIsProcessing(false);
     }
   };
+  
   
 
   const getAvailableTokens = (chainId) => {
