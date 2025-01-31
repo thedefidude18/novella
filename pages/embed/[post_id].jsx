@@ -6,6 +6,8 @@ import parse from "html-react-parser";
 import { getIpfsLink } from "../../utils";
 import DonateButton from "../../components/DonateButton";
 import { isDonationEnabled } from "../../config/categories";
+import Image from 'next/image';
+
 
 // Create Orbis instance outside component for reuse
 const orbis_server = new Orbis({
@@ -60,7 +62,7 @@ export default function PostEmbed({ post, error }) {
       <div className="prose prose-sm max-w-none">
         {post.content?.media && post.content.media[0] && (
           <div className="mb-4">
-            <img
+            <image
               src={getIpfsLink(post.content.media[0])}
               alt={post.content.title}
               className="w-full h-auto rounded-lg"

@@ -5,6 +5,7 @@ import LeftSidebar from '../components/LeftSidebar';
 import Sidebar from '../components/Sidebar';
 import { useOrbis } from "@orbisclub/components";
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Projects() {
   const { orbis } = useOrbis();
@@ -105,7 +106,7 @@ export default function Projects() {
 
                           {project.content.media && project.content.media[0] && (
                             <div className="ml-6 flex-shrink-0">
-                              <img
+                              <image
                                 src={project.content.media[0].url}
                                 alt={project.content.title}
                                 className="w-24 h-24 object-cover rounded-lg"
