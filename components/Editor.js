@@ -80,6 +80,7 @@ const Editor = ({ post, onPostCreated }) => {
     }
   };
 
+
   const addImage = async (event) => {
     setMediaLoading(true);
     const file = event.target.files[0];
@@ -225,46 +226,38 @@ const Editor = ({ post, onPostCreated }) => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm">
-      <div className="p-4">
-        {/* User Avatar and Input Area */}
-        <div className="flex items-start space-x-3">
-          <div className="flex-grow">
-            <TextareaAutosize
-              placeholder="What are you Building?"
-              className="w-full resize-none text-gray-900 placeholder-gray-500 p-2 focus:outline-none text-md border border-gray-300 rounded-lg"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+    <div className="max-w-3xl mx-auto bg-white rounded-lg">
+      <div className="p-1">
+      {/* User Avatar and Input Area */}
+<div className="flex items-start space-x-1">
+  <div className="flex-grow relative">
+    {/* Title Input */}
+    <TextareaAutosize
+      placeholder="What are you Building?"
+      className="w-full resize-none text-gray-900 placeholder-gray-500 p-2 focus:outline-none text-md border border-gray-300 rounded-lg"
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+    />
 
-            <TextareaAutosize
-              ref={textareaRef}
-              placeholder="Description"
-              className="w-full resize-none text-gray-900 placeholder-gray-500 p-2 focus:outline-none min-h-[100px] border border-gray-300 rounded-lg mt-2"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-            />
-          </div>
-        </div>
+    {/* Description Input */}
+    <div className="relative">
+      <TextareaAutosize
+        ref={textareaRef}
+        placeholder="Description"
+        className="w-full resize-none text-gray-900 placeholder-gray-500 p-2 focus:outline-none min-h-[100px] border border-gray-300 rounded-lg mt-2"
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+      />
 
-        {/* Error Message */}
-        {error && (
-          <div className="mt-2 text-red-500 text-sm">
-            {error}
-          </div>
-        )}
-
-        {/* Toolbar */}
-        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-          <div className="flex items-center space-x-2">
-            {/* AI Button */}
-            <ToolbarIconButton
-              onClick={generatePostWithAI}
-              loading={isAILoading}
-            >
-              <HiSparkles className="w-5 h-5" />
-            </ToolbarIconButton>
-
+      {/* Suggestion Buttons Inside the Description Textarea */}
+      <div className="absolute bottom-2 right-2 flex space-x-2">
+        <button
+         onClick={generatePostWithAI}
+         loading={isAILoading} // Replace with your function
+          className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none text-sm"
+        >
+          Generate
+          <HiSparkles className="w-5 h-5" /></button>
             <ToolbarIconButton
               onClick={addImage}
               isImage={true}
@@ -278,16 +271,10 @@ const Editor = ({ post, onPostCreated }) => {
             <ToolbarIconButton onClick={addItalic}>
               <span className="italic">I</span>
             </ToolbarIconButton>
-            <ToolbarIconButton onClick={addLink}>
-              <HiLink className="w-5 h-5" />
-            </ToolbarIconButton>
             <ToolbarIconButton onClick={addCodeBlock}>
               <HiCode className="w-5 h-5" />
             </ToolbarIconButton>
-
-            {/* Category Dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
+        <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200"
               >
@@ -333,30 +320,47 @@ const Editor = ({ post, onPostCreated }) => {
                   ))}
                 </div>
               )}
+        <button
+  onClick={updateArticle}
+  disabled={!category || !title || !body || status === 1}
+  className={`px-4 py-1.5 rounded-full font-medium text-white transition ${
+    status === 1
+      ? 'bg-blue-400 cursor-not-allowed'
+      : !category || !title || !body
+      ? 'bg-lime-300 cursor-not-allowed' // Change to gray instead of blue-300
+      : 'bg-green-500 hover:bg-lime-300'
+  }`}
+>
+  {status === 1 ? (
+    <div className="flex items-center">
+      <LoadingCircle className="w-4 h-4 mr-2" />
+      Posting...
+    </div>
+  ) : (
+    'Post'
+  )}
+</button>
+      </div>
+    </div>
+  </div>
+</div>
+        {/* Error Message */}
+        {error && (
+          <div className="mt-2 text-red-500 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Toolbar */}
+        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+          <div className="flex items-center space-x-2">
+            
+            {/* Category Dropdown */}
+            <div className="relative" ref={dropdownRef}>
             </div>
           </div>
 
           {/* Post Button */}
-          <button
-            onClick={updateArticle}
-            disabled={!category || !title || !body || status === 1}
-            className={`px-4 py-1.5 rounded-full font-medium ${
-              status === 1
-                ? 'bg-blue-400 text-white cursor-not-allowed'
-                : !category || !title || !body
-                ? 'bg-blue-300 text-white cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-600'
-            }`}
-          >
-            {status === 1 ? (
-              <div className="flex items-center">
-                <LoadingCircle className="w-4 h-4 mr-2" />
-                Posting...
-              </div>
-            ) : (
-              'Post'
-            )}
-          </button>
         </div>
       </div>
     </div>

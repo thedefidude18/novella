@@ -14,12 +14,16 @@ import {
   FaTag,
   FaEthereum,
   FaEllipsisH,
-  FaTrophy,
+  FaTrophy, FaEllipsisV,
 } from 'react-icons/fa';
 import DonateButton from './DonateButton';
 import { CATEGORIES } from '../config/categories';
 import useOutsideClick from '../hooks/useOutsideClick';
 import { POINTS_RULES } from '../config/points';
+import ChatModal from './ChatModal'; // Ensure this path is correct
+
+
+
 
 // Initialize TimeAgo
 if (!TimeAgo.getDefaultLocale()) {
@@ -30,6 +34,8 @@ const timeAgo = new TimeAgo('en-US');
 
 export default function PostItem({ post }) {
   const { orbis, user } = useOrbis();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAnswerVisible, setIsAnswerVisible] = useState(false);
   const [hasLiked, setHasLiked] = useState(false);
   const [categories, setCategories] = useState([]);
   const [updatedPost, setUpdatedPost] = useState(post);
@@ -40,6 +46,20 @@ export default function PostItem({ post }) {
   });
   const [isLoading, setIsLoading] = useState(false);
   const menuRef = useRef(null);
+  
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  
+
+  // State to manage the visibility of the chat modal
+  const [isChatVisible, setIsChatVisible] = useState(false);
+
+  // Function to toggle the visibility of the chat modal
+  const toggleChatVisibility = () => {
+    setIsChatVisible((prevState) => !prevState);
+  };
 
   useOutsideClick(menuRef, () => setShowMenu(false));
 
@@ -264,8 +284,8 @@ export default function PostItem({ post }) {
     CATEGORIES[post.content?.context]?.enableDonation || false;
 
   return (
-    <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border overflow-hidden">
-      <div className="p-6">
+<div className="bg-white dark:bg-dark-secondary border-b border-gray-300 dark:border-gray-700 w-full">
+<div className="p-6">
         <div className="flex items-start space-x-4">
           <Upvote
             like={like}
@@ -369,6 +389,11 @@ export default function PostItem({ post }) {
                   <CommentsIcon className="mr-2" />
                   {post.count_replies || 0}
                 </button>
+
+                <button onClick={toggleChatVisibility}>Chat</button>
+                <ChatModal isVisible={isChatVisible} onClose={toggleChatVisibility} />
+
+            
 
                 <span className="inline-flex items-center text-sm font-medium text-yellow-600">
                   {userPoints} points
