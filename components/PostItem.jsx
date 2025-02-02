@@ -390,7 +390,10 @@ export default function PostItem({ post }) {
                   {post.count_replies || 0}
                 </button>
 
-                <button onClick={toggleChatVisibility}>Chat</button>
+                <button onClick={toggleChatVisibility} className="p-2 bg-blue-500 rounded-full hover:bg-blue-600">
+  <img src="/public/youagent.svg" alt="Chat" className="w-6 h-6" />
+</button>
+
                 <ChatModal isVisible={isChatVisible} onClose={toggleChatVisibility} />
 
             
@@ -398,6 +401,14 @@ export default function PostItem({ post }) {
                 <span className="inline-flex items-center text-sm font-medium text-yellow-600">
                   {userPoints} points
                 </span>
+
+                <button
+                  className="flex items-center hover:text-gray-700"
+                  onClick={handleShare}
+                  disabled={isLoading}
+                >
+                  <FaShare className="mr-1" />
+                </button>
 
                 <button
                   className="flex items-center hover:text-gray-700"
