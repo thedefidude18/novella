@@ -228,9 +228,6 @@ const Editor = ({ post, onPostCreated }) => {
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg">
       <div className="p-1">
-      {/* User Avatar and Input Area */}
-<div className="flex items-start space-x-1">
-  <div className="flex-grow relative">
     {/* Title Input */}
     <TextareaAutosize
       placeholder="What are you Building?"
@@ -342,8 +339,6 @@ const Editor = ({ post, onPostCreated }) => {
 </button>
       </div>
     </div>
-  </div>
-</div>
         {/* Error Message */}
         {error && (
           <div className="mt-2 text-red-500 text-sm">

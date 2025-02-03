@@ -21,7 +21,8 @@ import { CATEGORIES } from '../config/categories';
 import useOutsideClick from '../hooks/useOutsideClick';
 import { POINTS_RULES } from '../config/points';
 import ChatModal from './ChatModal'; // Ensure this path is correct
-
+import { HiCog, HiCurrencyDollar, HiLogout, HiViewGrid } from "react-icons/hi";
+import { Dropdown } from 'react-bootstrap';
 
 
 
@@ -321,13 +322,28 @@ export default function PostItem({ post }) {
               </div>
 
               <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setShowMenu(!showMenu)}
-                  className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-tertiary transition-colors"
-                  disabled={isLoading}
-                >
-                  <FaEllipsisH className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                </button>
+
+
+              <div className="flex items-center gap-2">
+
+              <button
+    onClick={() => setShowMenu(!showMenu)}
+    className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-tertiary transition-colors"
+    disabled={isLoading}
+  >
+   <img src="/youagent.svg" alt="Chat" className="w-6 h-6" />
+  </button>
+
+
+<button
+    onClick={() => setShowMenu(!showMenu)}
+    className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-tertiary transition-colors"
+    disabled={isLoading}
+  >
+    <FaEllipsisH className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+  </button>
+</div>
+
 
                 {showMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-secondary rounded-lg shadow-lg py-1 z-10 border border-gray-200 dark:border-dark-border">
@@ -390,10 +406,6 @@ export default function PostItem({ post }) {
                   {post.count_replies || 0}
                 </button>
 
-                <button onClick={toggleChatVisibility} className="p-2 bg-blue-500 rounded-full hover:bg-blue-600">
-  <img src="/public/youagent.svg" alt="Chat" className="w-6 h-6" />
-</button>
-
                 <ChatModal isVisible={isChatVisible} onClose={toggleChatVisibility} />
 
             
@@ -410,13 +422,6 @@ export default function PostItem({ post }) {
                   <FaShare className="mr-1" />
                 </button>
 
-                <button
-                  className="flex items-center hover:text-gray-700"
-                  onClick={handleShare}
-                  disabled={isLoading}
-                >
-                  <FaShare className="mr-1" />
-                </button>
 
                 {showDonateButton && (
                   <>

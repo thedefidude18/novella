@@ -50,7 +50,7 @@ const Header = () => {
             </button>
 
             <Link href="/" className="flex items-center">
-              <img src="/logo-blue.svg" alt="Logo" className="h-15 w-22" />
+              <img src="/logo-blue.svg" alt="Logo" className="h-10 w-10" />
             </Link>
             
             {/* Search bar */}
