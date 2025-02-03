@@ -4,7 +4,6 @@ import { useOrbis } from '@orbisclub/components';
 import { LoadingCircle } from './Icons';
 import { getIpfsLink, sleep } from '../utils';
 import { HiLink, HiCode, HiPhotograph, HiSparkles } from 'react-icons/hi';
-import { POINTS_RULES } from '../config/points';
 import { useRouter } from 'next/router';
 
 const Editor = ({ post, onPostCreated }) => {
@@ -21,6 +20,12 @@ const Editor = ({ post, onPostCreated }) => {
   const [error, setError] = useState('');
   const dropdownRef = useRef(null);
   const textareaRef = useRef();
+
+  // Define the points rules
+const POINTS_RULES = {
+  CREATE_POST: 10, // Example: Award 10 points for creating a post
+  // Add other rules as needed
+};
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -80,7 +85,6 @@ const Editor = ({ post, onPostCreated }) => {
     }
   };
 
-
   const addImage = async (event) => {
     setMediaLoading(true);
     const file = event.target.files[0];
@@ -99,32 +103,43 @@ const Editor = ({ post, onPostCreated }) => {
     }
     setMediaLoading(false);
   };
+// Function to award points
+async function awardPoints(did, points) {
+  try {
+    // Fetch the user's current profile
+    const { data: profile } = await orbis.getProfile(did);
 
-  // Function to award points
-  async function awardPoints(did, points) {
-    try {
-      const response = await fetch('/api/award-points', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ did, points })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to award points');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error awarding points:', error);
-      // Don't throw the error - we want to continue even if points fail
-      return null;
+    if (!profile) {
+      throw new Error('User profile not found');
     }
+
+    // Get the current points from the profile metadata (default to 0 if not set)
+    const currentPoints = profile.details?.metadata?.points || 0;
+    console.log('Current Points:', currentPoints); // Debug log
+
+    // Calculate the new points total
+    const newPoints = currentPoints + points;
+
+    // Update the user's profile with the new points total
+    const updateRes = await orbis.updateProfile({
+      ...profile.details.profile,
+      metadata: {
+        ...profile.details.metadata,
+        points: newPoints, // Update the points in metadata
+      },
+    });
+
+    if (updateRes.status === 200) {
+      console.log('Points awarded successfully:', { did, points: newPoints });
+      return { success: true, did, points: newPoints };
+    } else {
+      throw new Error(updateRes.error || 'Failed to update profile');
+    }
+  } catch (error) {
+    console.error('Error awarding points:', error);
+    return { success: false, error: error.message };
   }
+}
 
   // Function to generate post content using AI
   const generatePostWithAI = async () => {
@@ -141,7 +156,9 @@ const Editor = ({ post, onPostCreated }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt: 'Write a short post about building in web3.' }),
+        body: JSON.stringify({
+          prompt: 'Write a short post about building in web3.',
+        }),
       });
 
       if (!response.ok) {
@@ -160,101 +177,122 @@ const Editor = ({ post, onPostCreated }) => {
 
   async function updateArticle() {
     if (!category) {
-      setError("Please select a category");
+      setError('Please select a category');
       return;
     }
-
+  
     if (!title.trim()) {
-      setError("Please enter a title");
+      setError('Please enter a title');
       return;
     }
-
+  
     if (!body.trim()) {
-      setError("Please enter content");
+      setError('Please enter content');
       return;
     }
-
+  
     setStatus(1);
-    setError("");
-
+    setError('');
+  
     try {
       const content = {
         title: title.trim(),
         body: body.trim(),
         context: category,
-        media: media
+        media: media,
       };
-
-      const res = post 
+  
+      const res = post
         ? await orbis.editPost(post.stream_id, content)
         : await orbis.createPost(content);
-
+  
       if (res.status === 200) {
         // Only award points for new posts
         if (!post && user) {
           // Award points but don't wait for it
-          awardPoints(user.did, POINTS_RULES.CREATE_POST)
-            .catch(error => console.error('Error awarding points:', error));
+          awardPoints(user.did, 10) // Example: Award 10 points for creating a post
+            .then((response) => {
+              if (response.success) {
+                console.log('Points awarded successfully:', response);
+              } else {
+                console.error('Error awarding points:', response.error);
+              }
+            })
+            .catch((error) => {
+              console.error('Error awarding points:', error);
+            });
         }
-
+  
         setStatus(2);
-        
+  
         // Clear form immediately after successful post
-        resetForm();
-        
+        setTitle('');
+        setBody('');
+        setMedia([]);
+        setCategory('');
+        setError('');
+  
         // Notify parent component about the new post
         if (onPostCreated) {
-          await onPostCreated();
+          await onPostCreated(); // Trigger feed refresh
         }
-        
+  
         await sleep(500);
-        
+  
         // Only navigate if we're not already on the home page
         if (router.pathname !== '/') {
           await router.replace('/');
         }
       } else {
-        throw new Error(res.error || "Failed to create post");
+        throw new Error(res.error || 'Failed to create post');
       }
     } catch (error) {
-      console.error("Error creating/editing post:", error);
-      setError(error.message || "Failed to create post");
+      console.error('Error creating/editing post:', error);
+      setError(error.message || 'Failed to create post');
       setStatus(3);
       await sleep(1000);
       setStatus(0);
     }
   }
 
+  
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-lg">
-      <div className="p-1">
-    {/* Title Input */}
-    <TextareaAutosize
-      placeholder="What are you Building?"
-      className="w-full resize-none text-gray-900 placeholder-gray-500 p-2 focus:outline-none text-md border border-gray-300 rounded-lg"
-      value={title}
-      onChange={(e) => setTitle(e.target.value)}
-    />
+    <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm">
+      <div className="p-4">
+        {/* User Avatar and Input Area */}
+        <div className="flex items-start space-x-3">
+          <div className="flex-grow">
+            <TextareaAutosize
+              placeholder="What are you Building?"
+              className="w-full resize-none text-gray-900 placeholder-gray-500 p-2 focus:outline-none text-md border border-gray-300 rounded-lg"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
 
-    {/* Description Input */}
-    <div className="relative">
-      <TextareaAutosize
-        ref={textareaRef}
-        placeholder="Description"
-        className="w-full resize-none text-gray-900 placeholder-gray-500 p-2 focus:outline-none min-h-[100px] border border-gray-300 rounded-lg mt-2"
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-      />
+            <TextareaAutosize
+              ref={textareaRef}
+              placeholder="Description"
+              className="w-full resize-none text-gray-900 placeholder-gray-500 p-2 focus:outline-none min-h-[100px] border border-gray-300 rounded-lg mt-2"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+            />
+          </div>
+        </div>
 
-      {/* Suggestion Buttons Inside the Description Textarea */}
-      <div className="absolute bottom-2 right-2 flex space-x-2">
-        <button
-         onClick={generatePostWithAI}
-         loading={isAILoading} // Replace with your function
-          className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none text-sm"
-        >
-          Generate
-          <HiSparkles className="w-5 h-5" /></button>
+        {/* Error Message */}
+        {error && <div className="mt-2 text-red-500 text-sm">{error}</div>}
+
+        {/* Toolbar */}
+        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+          <div className="flex items-center space-x-2">
+            {/* AI Button */}
+            <ToolbarIconButton
+              onClick={generatePostWithAI}
+              loading={isAILoading}
+            >
+              <HiSparkles className="w-5 h-5" />
+            </ToolbarIconButton>
+
             <ToolbarIconButton
               onClick={addImage}
               isImage={true}
@@ -268,10 +306,16 @@ const Editor = ({ post, onPostCreated }) => {
             <ToolbarIconButton onClick={addItalic}>
               <span className="italic">I</span>
             </ToolbarIconButton>
+            <ToolbarIconButton onClick={addLink}>
+              <HiLink className="w-5 h-5" />
+            </ToolbarIconButton>
             <ToolbarIconButton onClick={addCodeBlock}>
               <HiCode className="w-5 h-5" />
             </ToolbarIconButton>
-        <button
+
+            {/* Category Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200"
               >
@@ -302,7 +346,7 @@ const Editor = ({ post, onPostCreated }) => {
                     'governance',
                     'tutorials',
                     'announcements',
-                    'discussions'
+                    'discussions',
                   ].map((cat) => (
                     <button
                       key={cat}
@@ -317,45 +361,30 @@ const Editor = ({ post, onPostCreated }) => {
                   ))}
                 </div>
               )}
-        <button
-  onClick={updateArticle}
-  disabled={!category || !title || !body || status === 1}
-  className={`px-4 py-1.5 rounded-full font-medium text-white transition ${
-    status === 1
-      ? 'bg-blue-400 cursor-not-allowed'
-      : !category || !title || !body
-      ? 'bg-lime-300 cursor-not-allowed' // Change to gray instead of blue-300
-      : 'bg-green-500 hover:bg-lime-300'
-  }`}
->
-  {status === 1 ? (
-    <div className="flex items-center">
-      <LoadingCircle className="w-4 h-4 mr-2" />
-      Posting...
-    </div>
-  ) : (
-    'Post'
-  )}
-</button>
-      </div>
-    </div>
-        {/* Error Message */}
-        {error && (
-          <div className="mt-2 text-red-500 text-sm">
-            {error}
-          </div>
-        )}
-
-        {/* Toolbar */}
-        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-          <div className="flex items-center space-x-2">
-            
-            {/* Category Dropdown */}
-            <div className="relative" ref={dropdownRef}>
             </div>
           </div>
 
           {/* Post Button */}
+          <button
+            onClick={updateArticle}
+            disabled={!category || !title || !body || status === 1}
+            className={`px-4 py-1.5 rounded-full font-medium ${
+              status === 1
+                ? 'bg-blue-400 text-white cursor-not-allowed'
+                : !category || !title || !body
+                ? 'bg-blue-300 text-white cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+            }`}
+          >
+            {status === 1 ? (
+              <div className="flex items-center">
+                <LoadingCircle className="w-4 h-4 mr-2" />
+                Posting...
+              </div>
+            ) : (
+              'Post'
+            )}
+          </button>
         </div>
       </div>
     </div>
