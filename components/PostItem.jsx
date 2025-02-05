@@ -278,8 +278,9 @@ export default function PostItem({ post }) {
   };
 
   const formatDonation = (amount) => {
-    return parseFloat(amount).toFixed(4);
+    return parseFloat(amount).toFixed(4).replace(/\.?0+$/, ""); 
   };
+  
 
   const showDonateButton =
     CATEGORIES[post.content?.context]?.enableDonation || false;
@@ -306,19 +307,16 @@ export default function PostItem({ post }) {
                   className="w-4 h-4" 
                   title="Verified"
                 />
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {timeAgo.format(post.timestamp * 1000)}
-                </span>
+               <span className="text-xs text-gray-500 dark:text-gray-400">
+  {timeAgo.format(post.timestamp * 1000)}
+</span>
+
                 {post.content?.context && (
                   <>
                     <span className="text-gray-300 dark:text-gray-600">•</span>
-                    <span className="inline-flex items-center text-sm text-gray-500 dark:text-gray-400">
-                      <FaTag className="mr-1" />
-                      {categoryName}
-                    </span>
                   </>
                 )}
-                <span className="text-gray-300 dark:text-gray-600">•</span>
+                <span className="text-gray-300 dark:text-gray-600"></span>
               </div>
 
               <div className="relative" ref={menuRef}>
@@ -411,7 +409,7 @@ export default function PostItem({ post }) {
             
 
                 <span className="inline-flex items-center text-sm font-medium text-yellow-600">
-                  {userPoints} points
+                  {userPoints} pts
                 </span>
 
                 <button
@@ -422,11 +420,16 @@ export default function PostItem({ post }) {
                   <FaShare className="mr-1" />
                 </button>
 
+                <span className="inline-flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <FaTag className="mr-1" />
+                      {categoryName}
+                    </span>
+
 
                 {showDonateButton && (
                   <>
                     <div className="flex items-center space-x-2">
-                      <span className="text-gray-500">Raised:</span>
+                      <span className="text-gray-500">Grant:</span>
                       <div className="flex items-center text-green-600">
                         <FaEthereum className="mr-1" />
                         <span>
