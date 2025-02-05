@@ -300,7 +300,9 @@ export default function PostItem({ post }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
+              <div className="text-sm">
                 <User details={post.creator_details} />
+                </div>
                 <img 
                   src="/social-media.png"
                   alt="Verified" 
@@ -420,10 +422,10 @@ export default function PostItem({ post }) {
                   <FaShare className="mr-1" />
                 </button>
 
-                <span className="inline-flex items-center text-sm text-gray-500 dark:text-gray-400">
-                      <FaTag className="mr-1" />
-                      {categoryName}
-                    </span>
+                <span className="inline-flex items-center text-xs font-small bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full">
+  {categoryName}
+</span>
+
 
 
                 {showDonateButton && (
@@ -431,7 +433,7 @@ export default function PostItem({ post }) {
                     <div className="flex items-center space-x-2">
                       <span className="text-gray-500">Grant:</span>
                       <div className="flex items-center text-green-600">
-                        <FaEthereum className="mr-1" />
+                        
                         <span>
                           {formatDonation(totalDonations.USDT)} USDT
                         </span>
