@@ -36,6 +36,7 @@ const timeAgo = new TimeAgo('en-US');
 export default function PostItem({ post }) {
   const { orbis, user } = useOrbis();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showAiMenu, setShowAiMenu] = useState(false);
   const [isAnswerVisible, setIsAnswerVisible] = useState(false);
   const [hasLiked, setHasLiked] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -285,6 +286,20 @@ export default function PostItem({ post }) {
   const showDonateButton =
     CATEGORIES[post.content?.context]?.enableDonation || false;
 
+
+    // Add this useEffect near the other useEffect hooks
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (!event.target.closest('.ai-menu-container')) {
+      setShowAiMenu(false);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, []);
+
+
   return (
 <div className="bg-white dark:bg-dark-secondary border-b border-gray-300 dark:border-gray-700 w-full">
 <div className="p-6">
@@ -326,13 +341,62 @@ export default function PostItem({ post }) {
 
               <div className="flex items-center gap-2">
 
-              <button
-    onClick={() => setShowMenu(!showMenu)}
-    className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-tertiary transition-colors"
-    disabled={isLoading}
-  >
-   <img src="/youagent.svg" alt="Chat" className="w-6 h-6" />
-  </button>
+              {/* Replace the existing button with this dropdown menu */}
+<div className="relative">
+<button
+      onClick={() => setShowAiMenu(!showAiMenu)}
+      className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-tertiary transition-colors"
+      disabled={isLoading}
+    >
+      <img src="/youagent.svg" alt="AI Actions" className="w-6 h-6" />
+    </button>
+
+  {/* Dropdown Menu */}
+  {showAiMenu && (
+      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-secondary rounded-lg shadow-lg py-1 z-10 border border-gray-200 dark:border-dark-border">
+        <button
+          onClick={() => {
+            alert("Explain functionality coming soon");
+            setShowAiMenu(false);
+          }}
+          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-dark-secondary hover:bg-gray-50 dark:hover:bg-dark-tertiary flex items-center"
+        >
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Explain this post
+        </button>
+
+      <button
+        onClick={() => {
+          // Add swap functionality
+          alert("Swap functionality coming soon");
+          setShowMenu(false);
+        }}
+        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-dark-secondary hover:bg-gray-50 dark:hover:bg-dark-tertiary flex items-center"
+      >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+        </svg>
+        Swap
+      </button>
+      
+      <button
+        onClick={() => {
+          // Add donate functionality
+          alert("Donate functionality coming soon");
+          setShowMenu(false);
+        }}
+        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-dark-secondary hover:bg-gray-50 dark:hover:bg-dark-tertiary flex items-center"
+      >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Donate
+      </button>
+    </div>
+  )}
+</div>
 
 
 <button
