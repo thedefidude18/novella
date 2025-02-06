@@ -43,6 +43,8 @@ export default function PostItem({ post }) {
   const [updatedPost, setUpdatedPost] = useState(post);
   const [showMenu, setShowMenu] = useState(false);
   const [userPoints, setUserPoints] = useState(0);
+  const [agentSrc, setAgentSrc] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [totalDonations, setTotalDonations] = useState({
     USDT: 0
   });
@@ -61,6 +63,12 @@ export default function PostItem({ post }) {
   // Function to toggle the visibility of the chat modal
   const toggleChatVisibility = () => {
     setIsChatVisible((prevState) => !prevState);
+  };
+
+  const openAgentWithAction = (action) => {
+    console.log("Button clicked, action:", action); // Debugging
+    setAgentSrc(`https://youbuildagent.netlify.app/?action=${action}`);
+    setIsModalOpen(true);
   };
 
   useOutsideClick(menuRef, () => setShowMenu(false));
@@ -86,6 +94,10 @@ export default function PostItem({ post }) {
   const categoryName =
     categories.find((cat) => cat.stream_id === post.content.context)?.content
       ?.label || 'General';
+
+      useEffect(() => {
+        console.log("isModalOpen:", isModalOpen); // Debugging
+      }, [isModalOpen]);
 
   async function loadUserPoints() {
     if (post.creator_details?.did) {
@@ -367,19 +379,15 @@ useEffect(() => {
           Explain this post
         </button>
 
-      <button
-        onClick={() => {
-          // Add swap functionality
-          alert("Swap functionality coming soon");
-          setShowMenu(false);
-        }}
-        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-dark-secondary hover:bg-gray-50 dark:hover:bg-dark-tertiary flex items-center"
-      >
-        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-        </svg>
-        Swap
-      </button>
+        <button
+          onClick={() => openAgentWithAction("swap")}
+          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-dark-secondary hover:bg-gray-50 dark:hover:bg-dark-tertiary flex items-center"
+        >
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+          Swap
+        </button>
       
       <button
         onClick={() => {
@@ -397,6 +405,8 @@ useEffect(() => {
     </div>
   )}
 </div>
+
+
 
 
 <button
@@ -485,6 +495,7 @@ useEffect(() => {
                 >
                   <FaShare className="mr-1" />
                 </button>
+                
 
                 <span className="inline-flex items-center text-xs font-small bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full">
   {categoryName}

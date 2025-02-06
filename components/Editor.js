@@ -306,9 +306,6 @@ async function awardPoints(did, points) {
             <ToolbarIconButton onClick={addItalic}>
               <span className="italic">I</span>
             </ToolbarIconButton>
-            <ToolbarIconButton onClick={addLink}>
-              <HiLink className="w-5 h-5" />
-            </ToolbarIconButton>
             <ToolbarIconButton onClick={addCodeBlock}>
               <HiCode className="w-5 h-5" />
             </ToolbarIconButton>
