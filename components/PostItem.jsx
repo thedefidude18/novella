@@ -70,6 +70,7 @@ export default function PostItem({ post }) {
     setAgentSrc(`https://youbuildagent.netlify.app/?action=${action}`);
     setIsModalOpen(true);
   };
+    
 
   useOutsideClick(menuRef, () => setShowMenu(false));
 
@@ -380,14 +381,14 @@ useEffect(() => {
         </button>
 
         <button
-          onClick={() => openAgentWithAction("swap")}
-          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-dark-secondary hover:bg-gray-50 dark:hover:bg-dark-tertiary flex items-center"
-        >
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-          </svg>
-          Swap
-        </button>
+  onClick={() => openAgentWithAction("swap")}
+  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-dark-secondary hover:bg-gray-50 dark:hover:bg-dark-tertiary flex items-center"
+>
+  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+  </svg>
+  Swap
+</button>
       
       <button
         onClick={() => {
