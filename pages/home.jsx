@@ -12,9 +12,7 @@ export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadProjects();
-  }, []);
+
 
   async function loadProjects() {
     setLoading(true);
